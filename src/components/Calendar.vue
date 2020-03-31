@@ -3,7 +3,7 @@
     <v-col>
       <v-sheet height="64">
         <v-toolbar flat color="white">
-          <v-btn color="primary" class="mr-4" dark @click.stop="dialog = true">New Event</v-btn>
+          <v-btn color="primary" class="mr-4" dark @click.stop="openDialog">New Event</v-btn>
           <v-btn outlined class="mr-4" @click="setToday">Today</v-btn>
           <v-btn fab text small @click="prev">
             <v-icon small>mdi-chevron-left</v-icon>
@@ -30,9 +30,6 @@
               <v-list-item @click="type = 'month'">
                 <v-list-item-title>Month</v-list-item-title>
               </v-list-item>
-              <v-list-item @click="type = '4day'">
-                <v-list-item-title>4 days</v-list-item-title>
-              </v-list-item>
             </v-list>
           </v-menu>
         </v-toolbar>
@@ -44,9 +41,23 @@
             <v-form @submit.prevent="addEvent">
               <v-text-field v-model="name" type="text" label="event name (required)"></v-text-field>
               <v-text-field v-model="details" type="text" label="detail"></v-text-field>
-              <v-text-field v-model="start" type="date" label="start (required)"></v-text-field>
-              <v-text-field v-model="end" type="date" label="end (required)"></v-text-field>
-              <v-text-field v-model="color" type="color" label="color (click to open color menu)"></v-text-field>
+              <v-text-field
+                v-model="start"
+                type="text"
+                hint="e.g. 2020-01-01 8:00"
+                persistent-hint
+                label="start (required)"
+              ></v-text-field>
+              <v-text-field
+                v-model="end"
+                type="text"
+                hint="e.g. 2020-01-01 20:00"
+                persistent-hint
+                label="end (required)"
+              ></v-text-field>
+              <v-col cols="12" sm="6">
+                <v-text-field v-model="color" type="color" label="color (click to open color menu)"></v-text-field>
+              </v-col>
               <v-btn
                 type="submit"
                 color="primary"
@@ -64,9 +75,23 @@
             <v-form @submit.prevent="addEvent">
               <v-text-field v-model="name" type="text" label="event name (required)"></v-text-field>
               <v-text-field v-model="details" type="text" label="detail"></v-text-field>
-              <v-text-field v-model="start" type="date" label="start (required)"></v-text-field>
-              <v-text-field v-model="end" type="date" label="end (required)"></v-text-field>
-              <v-text-field v-model="color" type="color" label="color (click to open color menu)"></v-text-field>
+              <v-text-field
+                v-model="start"
+                type="text"
+                hint="e.g. 2020-01-01 8:00"
+                persistent-hint
+                label="start (required)"
+              ></v-text-field>
+              <v-text-field
+                v-model="end"
+                type="text"
+                hint="e.g. 2020-01-01 20:00"
+                persistent-hint
+                label="end (required)"
+              ></v-text-field>
+              <v-col cols="12" sm="6">
+                <v-text-field v-model="color" type="color" label="color (click to open color menu)"></v-text-field>
+              </v-col>
               <v-btn
                 type="submit"
                 color="primary"
@@ -147,8 +172,7 @@ export default {
     typeToLabel: {
       month: "Month",
       week: "Week",
-      day: "Day",
-      "4day": "4 Days"
+      day: "Day"
     },
     name: null,
     details: null,
@@ -165,6 +189,8 @@ export default {
   }),
   mounted() {
     this.getEvents();
+    this.start = "";
+    this.end = "";
   },
   computed: {
     title() {
@@ -184,7 +210,6 @@ export default {
         case "month":
           return `${startMonth} ${startYear}`;
         case "week":
-        case "4day":
           return `${startMonth} ${startDay} ${startYear} - ${suffixMonth} ${endDay} ${suffixYear}`;
         case "day":
           return `${startMonth} ${startDay} ${startYear}`;
@@ -209,9 +234,16 @@ export default {
       });
       this.events = events;
     },
+    openDialog() {
+      this.dialog = true;
+      this.start = "";
+      this.end = "";
+    },
     setDialogDate({ date }) {
       this.dialogDate = true;
       this.focus = date;
+      this.start = "";
+      this.end = "";
     },
     viewDay({ date }) {
       this.focus = date;
@@ -239,11 +271,11 @@ export default {
           color: this.color
         });
         this.getEvents();
-        (this.name = ""),
-          (this.details = ""),
-          (this.start = ""),
-          (this.end = ""),
-          (this.color = "");
+        this.name = "";
+        this.details = "";
+        this.start = "";
+        this.end = "";
+        this.color = "";
       } else {
         alert("You must enter event name, start, and end time");
       }
